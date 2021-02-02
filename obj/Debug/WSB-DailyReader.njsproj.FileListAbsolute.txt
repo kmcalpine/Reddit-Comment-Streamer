@@ -1,0 +1,2 @@
+C:\Users\Kurtis McAlpine\source\repos\WSB-DailyReader\WSB-DailyReader\obj\Debug\WSB-DailyReader.njsproj.CoreCompileInputs.cache
+C:\Users\Kurtis McAlpine\source\repos\WSB-DailyReader\WSB-DailyReader\bin\Microsoft.NodejsTools.WebRole.dll
