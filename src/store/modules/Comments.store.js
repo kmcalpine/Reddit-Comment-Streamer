@@ -15,6 +15,9 @@ const state = getInitCommentState();
 
 const mutations = {
     updateField,
+    RESET(state) {
+        Object.assign(state, getInitCommentState());
+    },
     ADD_NEW_COMMENT(state, payload) {
         if (state.comments.comments.length >= 25) {
             state.comments.comments.splice(0, 1);
@@ -27,6 +30,9 @@ const mutations = {
     ADD_TO_BUFFER(state, payload) {
         if (payload.kind !== 't1') {
             return;
+        }
+        if (state.comments.commentBuffer.length > 4000) {
+            state.comments.commentBuffer.splice(0, 100);
         }
         state.comments.commentBuffer.unshift(payload);
     },

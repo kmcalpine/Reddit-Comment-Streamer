@@ -1,7 +1,8 @@
 import Vue from 'vue';
 import App from './App.vue';
 import axios from 'axios';
-import store from './store/storeIndex'
+import store from './store/storeIndex';
+import VueRouter from 'vue-router';
 import 'animate.css'
 
 let $axios = axios.create({
@@ -11,10 +12,13 @@ let $axios = axios.create({
     }
 })
 
+const router = new VueRouter({})
+
 Vue.prototype.$axios = $axios
 Vue.config.productionTip = true;
 
 new Vue({
     render: h => h(App),
-    store
+    store,
+    router
 }).$mount('#app');

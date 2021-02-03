@@ -4,7 +4,7 @@
 
             <div class="custom-select" @blur="open = false">
                 <div class="selected" :class="{ open: open }" @click="open = !open">
-                    {{ selected }}
+                    {{ this.selected }}
                 </div>
                 <div class="items" :class="{ selectHide: !open }">
                     <div v-for="(post, index) in this.posts" :key="index"
@@ -34,7 +34,8 @@
         },
         props: {
             posts: Array,
-            currentPost: String
+            currentPost: String,
+            subreddit: String
         },
         data() {
             return {
@@ -118,7 +119,8 @@
         color: #bebed4;
         overflow-y: scroll;
         background-color: #0b0b12;
-        height: 500px;
+        height: 400px;
+        width: 100%;
     }
 
     .custom-select .items div {
@@ -129,9 +131,9 @@
         line-height: 20px;
     }
 
-        .custom-select .items div:hover {
-            background-color: #11111d;
-        }
+    .custom-select .items div:hover {
+        background-color: #11111d;
+    }
 
     .selectHide {
         display: none;

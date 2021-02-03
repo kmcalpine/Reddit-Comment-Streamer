@@ -1,13 +1,15 @@
 <template>
     <div class="site-wrapper">
+        <div class="subReddit-title">
+            {{ this.subreddit }}
+        </div>
         <div class="subReddit-wrapper">
-            <subRedditContainer :posts="this.posts" v-on:click="updatePostTitle"/>
+            <subRedditContainer :posts="this.posts" v-on:click="updatePostTitle" :subreddit="this.subreddit"/>
         </div>
-        
         <div class="commentContainer-wrapper">
-            <CommentContainer :comments='comments' />
+            <CommentContainer :comments='comments' v-on:scroll="pauseLoading" :initLoading="this.initLoading"/>
         </div>
-        
+
 
     </div>
 
@@ -15,6 +17,7 @@
 </template>
 
 <script>
+    import { SpringSpinner } from 'epic-spinners'
     import { mapState, mapMutations } from 'vuex';
     import CommentContainer from './CommentContainer.vue';
     import subRedditContainer from './subRedditContainer.vue';
@@ -25,14 +28,18 @@
             CommentContainer,
             subRedditContainer
         },
-        props: {},
+        props: {
+            subreddit: String
+        },
         data() {
             return {
                 testData: 'LOADING',
                 staggerComment: false,
                 tmpComments: [],
                 posts: [],
-                currentPost: ''
+                currentPost: '',
+                pauseCommentLoading: false,
+                initLoading: false
             }
         },  
         computed: {
@@ -40,6 +47,7 @@
         },
         methods: {
             ...mapMutations('Comments', [
+                'RESET',
                 'ADD_NEW_COMMENT',
                 'ADD_COMMENT_ID',
                 'ADD_TO_BUFFER',
@@ -48,29 +56,35 @@
             ]),
 
             initSubReddit() {
-                fetch('https://www.reddit.com/r/wallstreetbets.json')
+                console.log('https://www.reddit.com' + this.subreddit + '.json');
+                fetch('https://www.reddit.com'+this.subreddit+'.json')
                     .then(response => response.json())
                     .then(data => {
-                        console.log(data);
-                        this.posts = data.data.children;
-                        
+                        this.posts = data.data.children;               
                     });
+            },
+
+            pauseLoading(val) {
+                this.pauseCommentLoading = val;
+                
             },
 
             loadComments() {
 
                 if (!this.commentInterval) {
-                    this.commentInterval = setInterval(this.getComments, 3000);
+                    this.commentInterval = setInterval(this.getComments, 9856);
                 }
             },
 
             updatePostTitle(post) {
-                console.log(post.data);
                 this.currentPost = post;
-                this.loadComments();
+                this.RESET(); // reset current loaded comments
+                this.initLoading = true; 
+                this.loadComments(); // load new comments from post
             },
             getComments() {
-                fetch('https://www.reddit.com'+this.currentPost.data.permalink+'.json?sort=new&limit=100')
+
+                fetch('https://www.reddit.com'+this.currentPost.data.permalink+'.json?sort=new&limit=50')
                 .then(response => response.json())
                 .then(data => {
                     this.testData = data[0].data.children[0].data.title;
@@ -80,6 +94,8 @@
 
                 this.sortComments();
                 this.getAuthorData();
+
+                
 
                 if (!this.staggerComment) {
                     this.staggerComment = true;
@@ -108,10 +124,6 @@
                                 comment.data.accountCreation = d.data.created;
                                 this.ADD_COMMENT_ID(comment.data.id);
                                 this.ADD_TO_BUFFER(comment);
-                                //if (1549071466 > comment.data.accountCreation) {
-                                //    console.log(1549071466 > comment.data.accountCreation);
-                                //    this.ADD_TO_BUFFER(comment);
-                                //}
                             })
                     }
                 });
@@ -119,8 +131,16 @@
             },
 
             commentStagger() {
+                if (this.pauseCommentLoading) {
+                    return;
+                }
                 if (this.comments.commentBuffer.length > 0) {
-                    let length = Math.floor(Math.random() * Math.floor(this.comments.commentBuffer.length / 5) + 1) + 1;
+                    let length = Math.floor(Math.random() * Math.floor(this.comments.commentBuffer.length / 4) + 1) + 1;
+
+                    if (this.initLoading) {
+                        this.initLoading = false;
+                    }
+
                     this.SPLICE_BUFFER(length);
                 }
             },
@@ -138,6 +158,15 @@
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+    .subReddit-title {
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 12px;
+        font-weight: bold;
+        position: relative;
+        color: #bebed4;
+        padding-left: 10px;
+        padding-bottom: 10px;
+    }
     h1 {
         font-family: Arial, Helvetica, sans-serif;
         font-size: 10px
@@ -178,7 +207,5 @@
         width: 100%;
         margin-top: 10px;
     }
-
-   
 </style>
 

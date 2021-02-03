@@ -1,13 +1,14 @@
 <template>
 
     <div id="app">
-        <Home />
+        <Home :subreddit="this.subreddit"/>
     </div>
 
 
 </template>
 
 <script>
+    import VueRouter from 'vue-router';
     import Home from './components/Home.vue';
 
     export default {
@@ -15,6 +16,11 @@
         components: {
             Home
         },
+        data() {
+            return {
+                subreddit: window.location.pathname
+            }
+        }, 
     };
 </script>
 
