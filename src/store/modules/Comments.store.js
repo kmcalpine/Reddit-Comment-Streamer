@@ -19,7 +19,7 @@ const mutations = {
         Object.assign(state, getInitCommentState());
     },
     ADD_NEW_COMMENT(state, payload) {
-        if (state.comments.comments.length >= 25) {
+        if (state.comments.comments.length >= 100) {
             state.comments.comments.splice(0, 1);
             state.comments.comments.push(payload);
         }
@@ -32,12 +32,15 @@ const mutations = {
             return;
         }
         if (state.comments.commentBuffer.length > 4000) {
-            state.comments.commentBuffer.splice(0, 100);
+            state.comments.commentBuffer.splice(0, 3000);
         }
         state.comments.commentBuffer.unshift(payload);
     },
     ADD_COMMENT_ID(state, payload) {
-        state.comments.commentID.push(payload);
+        if (state.comments.commentID.length > 4000) {
+            state.comments.commentID.splice(0, 3000);
+        }
+        state.comments.commentID.unshift(payload);
     },
     SPLICE_BUFFER(state, payload) {
         let tempBuffer = state.comments.commentBuffer.splice(0, payload);

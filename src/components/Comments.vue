@@ -1,43 +1,34 @@
 <template>
-
-        
-    <div class="comments">
-        <div class="comments-data ">
-            <div class="comment-author-container">
-                <div class="comment-author">
-                    <span>{{ comment.author }}</span>
-                </div>
-                <div class="comment-account-date">
-                    <span>account created: {{ new Date(comment.accountCreation*1000).toLocaleDateString("en-US") }}</span>
-                </div>
-            </div>
-
-            <div class="comment-body-container">
-                <div class="comment-body">
-                    <span>{{ comment.body }}</span>
-                </div>
+    <div class="comment-wrapper">
+        <div class="comments" v-for="comment in this.comments.comments">
+            <div class="comments-data">
+                <slot :comment="comment"></slot>
             </div>
         </div>
-
     </div>
-
-
-
 </template>
 
 <script>
     export default {
         name: 'Comments',
         props: {
-            comment: Object,
+            comments: Object
         },
         data() {
             return {
             }
         },
+        methods: {
+            updateScroll() {
+                this.$emit('updateScroll', true);
+            }
+        },
+        updated() {
+            this.updateScroll();
 
-
-
+        },
+        mounted() {
+        }
     };
 </script>
 

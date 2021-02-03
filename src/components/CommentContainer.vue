@@ -7,7 +7,7 @@
                     leave-active-class="animated fadeOutDown faster"
                     mode="out-in"
                     >
-                    <div class="radar-spinner fadeInUp" v-if="this.initLoading">
+                    <div class="radar-spinner " v-if="this.initLoading">
                         <div class="circle">
                             <div class="circle-inner-container">
                                 <div class="circle-inner"></div>
@@ -34,7 +34,30 @@
                     </div>
                 </transition>
             </div>
-            <Comments :comment="comment.data" v-for="(comment, index) in this.comments.comments" :key="index" />
+
+
+            <Comments :comments="this.comments" @updateScroll="scrollBottom">
+                <template v-slot:default="{ comment }">
+                    
+                    <div class="comment-author-container">
+                        <div class="comment-author">
+                            <span>{{ comment.data.author }}</span>
+                        </div>
+                        <div class="comment-account-date">
+                            <span>account created: {{ new Date(comment.data.accountCreation*1000).toLocaleDateString("en-US") }}</span>
+                        </div>
+                    </div>
+
+                    <div class="comment-body-container">
+                        <div class="comment-body">
+                            <span>{{ comment.data.body }}</span>
+                        </div>
+                    </div>
+                </template>
+                
+            </Comments>
+
+
         </div>
     </div>
 
@@ -62,31 +85,33 @@
             }
         },
         methods: {
-            scrollBottom() {
-                let el = this.$refs.logsref;
+
+            scrollBottom(val) {
                 if (!this.scrolled) {
                     this.$refs.logsref.scrollTop = this.$refs.logsref.scrollHeight;
+                    
                     //this.$refs.logsref.scrollTo({ top: this.$refs.logsref.scrollHeight, behavior: 'smooth' })
                 }
 
+
             },
             scroll() {
+ 
 
-                if (((this.containerScroll.scrollHeight - this.containerScroll.offsetHeight) - this.containerScroll.scrollTop) > 100) {
+                if (this.$refs.logsref.scrollTop + this.$refs.logsref.offsetHeight < this.$refs.logsref.scrollHeight) {
                     this.$emit('scroll', true);
-
+                    this.scrolled = true; 
+                    console.log('scrolling');
                 }
-                else {
+                if (this.$refs.logsref.scrollTop + this.$refs.logsref.offsetHeight === this.$refs.logsref.scrollHeight) {
+                    console.log('not scrolling');
                     this.$emit('scroll', false);
                     this.scrolled = false;
                 }
-                
             }
+
         },
-        updated() {
-            this.scrollBottom();
-            
-        },
+
         mounted() {
             this.containerScroll = this.$refs.logsref;
             let el = this.$refs.logsref;
@@ -115,6 +140,70 @@
     p {
         font-family: Arial, Helvetica, sans-serif;
         font-size: 18px;
+    }
+
+    .comments {
+        width: 100%;
+        border-bottom: 1px solid #1b1b2f;
+    }
+
+    p {
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 18px;
+    }
+
+    .comment-author-container {
+        display: flex;
+    }
+
+    .comment-author {
+        margin-right: 10px;
+    }
+
+        .comment-author span {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 10px;
+            font-weight: bold;
+            color: #e43f5a;
+        }
+
+    .comment-account-date {
+        background: #1b1b2f;
+        border-radius: 4px;
+    }
+
+        .comment-account-date span {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 10px;
+            font-weight: bold;
+            color: #60608d;
+            padding: 5px;
+        }
+
+    .comments-data {
+        width: 100%;
+        overflow-wrap: anywhere;
+    }
+
+    .comment-author-container {
+        padding-top: 20px;
+        padding-right: 20px;
+        padding-left: 20px;
+        padding-bottom: 5px;
+    }
+
+    .comment-body-container {
+        padding-top: 5px;
+        padding-right: 20px;
+        padding-left: 20px;
+        padding-bottom: 20px
+    }
+
+    .comment-body span {
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 12px;
+        color: #bebed4;
+        line-height: 20px;
     }
 
     .home {
@@ -166,20 +255,6 @@
         margin-top: 10px;
         color: #8d8d8d;
         width: 100%;
-    }
-
-    .comments-container1 {
-        position: relative;
-        display: flex;
-        flex: 1;
-        margin-bottom: 10px;
-        background-color: #1b1b2f;
-        border-radius: 4px;
-        overflow-x: hidden;
-        overflow-y: auto;
-        margin-top: 10px;
-        color: #162447;
-        height: 100%;
     }
     .comments-container {
         position: relative;
@@ -260,10 +335,10 @@
         border: calc(60px * 5 / 110) solid transparent;
     }
 
-    .radar-spinner .circle-inner {
-        border-left-color: #ff1d5e;
-        border-right-color: #ff1d5e;
-    }
+        .radar-spinner .circle-inner {
+            border-left-color: #e43f5a;
+            border-right-color: #e43f5a;
+        }
 
     @keyframes radar-spinner-animation {
         50% {

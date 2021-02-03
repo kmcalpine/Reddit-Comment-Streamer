@@ -1,8 +1,5 @@
 <template>
     <div class="site-wrapper">
-        <div class="subReddit-title">
-            {{ this.subreddit }}
-        </div>
         <div class="subReddit-wrapper">
             <subRedditContainer :posts="this.posts" v-on:click="updatePostTitle" :subreddit="this.subreddit"/>
         </div>
@@ -72,7 +69,7 @@
             loadComments() {
 
                 if (!this.commentInterval) {
-                    this.commentInterval = setInterval(this.getComments, 9856);
+                    this.commentInterval = setInterval(this.getComments, 5000);
                 }
             },
 
@@ -83,8 +80,10 @@
                 this.loadComments(); // load new comments from post
             },
             getComments() {
-
-                fetch('https://www.reddit.com'+this.currentPost.data.permalink+'.json?sort=new&limit=50')
+                if (this.pauseCommentLoading) {
+                    return;
+                }
+                fetch('https://www.reddit.com'+this.currentPost.data.permalink+'.json?sort=new&limit=200')
                 .then(response => response.json())
                 .then(data => {
                     this.testData = data[0].data.children[0].data.title;
@@ -100,7 +99,7 @@
                 if (!this.staggerComment) {
                     this.staggerComment = true;
                     this.commentStagger();
-                    let staggerInterval = setInterval(this.commentStagger, 500);
+                    let staggerInterval = setInterval(this.commentStagger, 250);
                 }
 
             },
@@ -135,7 +134,7 @@
                     return;
                 }
                 if (this.comments.commentBuffer.length > 0) {
-                    let length = Math.floor(Math.random() * Math.floor(this.comments.commentBuffer.length / 4) + 1) + 1;
+                    let length = Math.floor(Math.random() * Math.floor(this.comments.commentBuffer.length / 3) + 1) + 1;
 
                     if (this.initLoading) {
                         this.initLoading = false;
