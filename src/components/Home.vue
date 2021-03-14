@@ -52,9 +52,13 @@
 
             async initSubReddit(sub) {
                 console.log('https://www.reddit.com' + sub + '.json');
-                let response = await axios.get('https://www.reddit.com' + sub + '.json');
-                console.log(response);
-                this.posts = response.data.data.children;
+                try {
+                    let response = await axios.get('https://www.reddit.com' + sub + '.json');
+                    console.log(response);
+                    this.posts = response.data.data.children;
+                } catch (error) {
+                    console.log("error", error);
+                }
             },
 
             pauseLoading(val) {
@@ -83,18 +87,19 @@
             /**
             * Load comments from selected post.
             */
-            getComments() {
+            async getComments() {
                 if (this.pauseCommentLoading) {
                     return;
                 }
 
-                axios.get('https://www.reddit.com'+this.currentPost.data.permalink+'.json?sort=new&limit=40')
-                .then(response => response.data)
-                .then(data => {
-                    this.testData = data[0].data.children[0].data.title;
-                    this.tmpComments = data[1].data.children; 
+                try {
+                    let response = await axios.get('https://www.reddit.com' + this.currentPost.data.permalink + '.json?sort=new&limit=40');
+                    this.testData = response.data[0].data.children[0].data.title;
+                    this.tmpComments = response.data[1].data.children;
+                } catch (error) {
+                    console.log(error);
+                }
 
-                })
 
                 this.sortComments();
                 this.getAuthorData();
@@ -115,22 +120,23 @@
                 })
             },
 
-            getAuthorData() {
-                this.tmpComments.forEach(comment => {
-                    if (comment.data.author === '[deleted]') {
+            async getAuthorData() {
+                for (let i = 0; this.tmpComments.length; i++) {
+                    if (this.tmpComments[i].data.author === '[deleted]') {
                         return;
                     }
-                    if (this.comments.commentID.indexOf(comment.data.id) === -1) {
-
-                        fetch('https://www.reddit.com/user/' + comment.data.author + '/about.json')
-                            .then(r => r.json())
-                            .then(d => {
-                                comment.data.accountCreation = d.data.created;
-                                this.ADD_COMMENT_ID(comment.data.id);
-                                this.ADD_TO_BUFFER(comment);
-                            })
+                    if (this.comments.commentID.indexOf(this.tmpComments[i].data.id) === -1) {
+                        try {
+                            let response = await axios.get('https://www.reddit.com/user/' + this.tmpComments[i].data.author + '/about.json');
+                            this.tmpComments[i].data.accountCreation = response.data.data.created;
+                            this.ADD_COMMENT_ID(this.tmpComments[i].data.id);
+                            this.ADD_TO_BUFFER(this.tmpComments[i]);
+                        } catch (error) {
+                            console.log("error", error);
+                        }
+                        
                     }
-                });
+                }
                 this.tmpComments = [];
             },
 
